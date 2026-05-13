@@ -48,9 +48,22 @@ sudo -u github-runner /opt/actions-runner/config.sh \\
 
 sudo -u github-runner /opt/actions-runner/run.sh || true
 
-IID=$(curl -sf -H 'Metadata-Flavor:Google' http://169.254.169.254/computeMetadata/v1/instance/id)
-TOK=$(curl -sf -H 'Metadata-Flavor:Google' http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
-curl -sf -X DELETE -H "Authorization: Bearer $TOK" "https://compute.api.cloud.yandex.net/compute/v1/instances/$IID" || true
+# Self-delete: try up to 3 times, then poweroff as fallback
+set +euo pipefail
+for attempt in 1 2 3; do
+    IID=$(curl -s --max-time 5 -H 'Metadata-Flavor:Google' \
+        http://169.254.169.254/computeMetadata/v1/instance/id 2>/dev/null)
+    TOK=$(curl -s --max-time 5 -H 'Metadata-Flavor:Google' \
+        http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token \
+        2>/dev/null | jq -r '.access_token // empty')
+    if [ -n "$IID" ] && [ -n "$TOK" ]; then
+        HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -X DELETE \
+            -H "Authorization: Bearer $TOK" \
+            "https://compute.api.cloud.yandex.net/compute/v1/instances/$IID")
+        [ "$HTTP" -eq 200 ] && break
+    fi
+    sleep 5
+done
 
 poweroff
 """
@@ -154,6 +167,7 @@ def _create_vm(vm_name: str, user_data: str) -> str:
             "coreFraction": 100,
         },
         "bootDiskSpec": {
+            "autoDelete": True,
             "diskSpec": {
                 "size": RUNNER_DISK_GB * 1024 ** 3,
                 "typeId": RUNNER_DISK_TYPE,
