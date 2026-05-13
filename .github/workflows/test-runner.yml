@@ -1,0 +1,28 @@
+name: Test YC Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: yc-ephemeral
+    timeout-minutes: 15
+    steps:
+      - name: System info
+        run: |
+          echo "Hostname: $(hostname)"
+          echo "Kernel: $(uname -r)"
+          echo "CPU cores: $(nproc)"
+          echo "RAM: $(free -h | awk '/^Mem:/ {print $2}')"
+          echo "Disk: $(df -h / | awk 'NR==2 {print $4}') free"
+
+      - name: Check internet access
+        run: curl -sf https://api.github.com/zen
+
+      - name: Confirm runner is ephemeral
+        run: |
+          if [ "${RUNNER_EPHEMERAL}" = "true" ]; then
+            echo "Runner is ephemeral"
+          else
+            echo "WARNING: runner is not ephemeral"
+          fi
