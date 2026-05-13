@@ -14,7 +14,7 @@ jobs:
         with:
           mode: start
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           folder-id: b1g606qspnhgrua2djkm
           image-id: fd8fc3q8qr0cgjqk2v94
           zone-id: ru-central1-a
