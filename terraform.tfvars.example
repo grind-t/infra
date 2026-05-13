@@ -1,5 +1,5 @@
 github_org         = "grind-t"
-github_entity_type = "user"   # "user" for personal account, "org" for organization
+github_entity_type = "repo"   # "repo" (per-repo runners), "org" (organization), "user" (personal account)
 github_pat     = "github_pat_..."
 webhook_secret = "generate-with: openssl rand -hex 32"
 

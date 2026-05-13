@@ -15,12 +15,12 @@ variable "github_org" {
 
 variable "github_entity_type" {
   type        = string
-  default     = "org"
-  description = "Either 'org' (GitHub organization) or 'user' (personal account)"
+  default     = "repo"
+  description = "'org' (GitHub organization), 'user' (personal account), or 'repo' (single repository)"
 
   validation {
-    condition     = contains(["org", "user"], var.github_entity_type)
-    error_message = "Must be 'org' or 'user'."
+    condition     = contains(["org", "user", "repo"], var.github_entity_type)
+    error_message = "Must be 'org', 'user', or 'repo'."
   }
 }
 

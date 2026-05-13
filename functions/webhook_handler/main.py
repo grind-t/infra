@@ -10,7 +10,7 @@ FOLDER_ID        = os.environ["FOLDER_ID"]
 SUBNET_ID        = os.environ["SUBNET_ID"]
 RUNNER_SA_ID     = os.environ["RUNNER_SA_ID"]
 GITHUB_ORG         = os.environ["GITHUB_ORG"]
-GITHUB_ENTITY_TYPE = os.environ.get("GITHUB_ENTITY_TYPE", "org")  # "org" or "user"
+GITHUB_ENTITY_TYPE = os.environ.get("GITHUB_ENTITY_TYPE", "repo")  # "org", "user", or "repo"
 RUNNER_LABELS    = os.environ["RUNNER_LABELS"]
 RUNNER_CORES     = int(os.environ["RUNNER_CORES"])
 RUNNER_MEMORY_MB = int(os.environ["RUNNER_MEMORY_MB"])
@@ -37,7 +37,7 @@ tar xzf runner.tar.gz && rm runner.tar.gz
 chown -R github-runner:github-runner /opt/actions-runner
 
 sudo -u github-runner /opt/actions-runner/config.sh \\
-  --url https://github.com/__ORG__ \\
+  --url __RUNNER_URL__ \\
   --token __TOKEN__ \\
   --name __NAME__ \\
   --labels __LABELS__ \\
@@ -76,7 +76,10 @@ def handler(event, context):
     if RUNNER_LABELS not in requested_labels:
         return {"statusCode": 200, "body": "label mismatch, skipped"}
 
-    reg_token = _get_registration_token(GITHUB_ORG, GITHUB_PAT, GITHUB_ENTITY_TYPE)
+    repo_owner = payload.get("repository", {}).get("owner", {}).get("login", GITHUB_ORG)
+    repo_name  = payload.get("repository", {}).get("name", "")
+
+    reg_token = _get_registration_token(repo_owner, repo_name, GITHUB_PAT, GITHUB_ENTITY_TYPE)
 
     run_id = job.get("run_id", int(time.time()))
     job_id = job.get("id", 0)
@@ -84,9 +87,11 @@ def handler(event, context):
 
     user_data = _render_cloud_init(
         vm_name=vm_name,
-        github_org=GITHUB_ORG,
+        github_org=repo_owner,
         reg_token=reg_token,
         runner_labels=RUNNER_LABELS,
+        github_repo=repo_name,
+        entity_type=GITHUB_ENTITY_TYPE,
     )
 
     vm_id = _create_vm(vm_name, user_data)
@@ -101,9 +106,11 @@ def _verify_signature(body: bytes, header: str, secret: str) -> bool:
     return hmac.compare_digest(expected, header)
 
 
-def _get_registration_token(org: str, pat: str, entity_type: str = "org") -> str:
+def _get_registration_token(org: str, repo: str, pat: str, entity_type: str = "repo") -> str:
     if entity_type == "user":
         url = "https://api.github.com/user/actions/runners/registration-token"
+    elif entity_type == "repo":
+        url = f"https://api.github.com/repos/{org}/{repo}/actions/runners/registration-token"
     else:
         url = f"https://api.github.com/orgs/{org}/actions/runners/registration-token"
     req = urllib.request.Request(
@@ -177,10 +184,15 @@ def _create_vm(vm_name: str, user_data: str) -> str:
     return result.get("metadata", {}).get("instanceId", result.get("id", "unknown"))
 
 
-def _render_cloud_init(vm_name: str, github_org: str, reg_token: str, runner_labels: str) -> str:
+def _render_cloud_init(vm_name: str, github_org: str, reg_token: str, runner_labels: str, github_repo: str = "", entity_type: str = "repo") -> str:
+    if entity_type == "repo":
+        runner_url = f"https://github.com/{github_org}/{github_repo}"
+    else:
+        runner_url = f"https://github.com/{github_org}"
+
     script = (
         _RUNNER_SCRIPT_TEMPLATE
-        .replace("__ORG__", github_org)
+        .replace("__RUNNER_URL__", runner_url)
         .replace("__TOKEN__", reg_token)
         .replace("__NAME__", vm_name)
         .replace("__LABELS__", runner_labels)
