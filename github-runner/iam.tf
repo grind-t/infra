@@ -3,20 +3,14 @@ resource "yandex_iam_service_account" "runner_sa" {
   folder_id = var.folder_id
 }
 
-resource "yandex_resourcemanager_folder_iam_member" "runner_sa_compute_admin" {
+resource "yandex_resourcemanager_folder_iam_member" "runner_sa_editor" {
   folder_id = var.folder_id
-  role      = "compute.admin"
+  role      = "editor"
   member    = "serviceAccount:${yandex_iam_service_account.runner_sa.id}"
 }
 
-resource "yandex_resourcemanager_folder_iam_member" "runner_sa_vpc_user" {
-  folder_id = var.folder_id
-  role      = "vpc.user"
-  member    = "serviceAccount:${yandex_iam_service_account.runner_sa.id}"
-}
-
-resource "yandex_resourcemanager_folder_iam_member" "runner_sa_rm_viewer" {
-  folder_id = var.folder_id
-  role      = "resource-manager.viewer"
-  member    = "serviceAccount:${yandex_iam_service_account.runner_sa.id}"
+resource "yandex_resourcemanager_cloud_iam_member" "runner_sa_cloud_member" {
+  cloud_id = var.cloud_id
+  role     = "resource-manager.clouds.member"
+  member   = "serviceAccount:${yandex_iam_service_account.runner_sa.id}"
 }

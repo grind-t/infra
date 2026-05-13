@@ -3,6 +3,11 @@ variable "folder_id" {
   default = "b1g606qspnhgrua2djkm"
 }
 
+variable "cloud_id" {
+  type    = string
+  default = "b1gckpahv8ok43fi258m"
+}
+
 variable "zone" {
   type    = string
   default = "ru-central1-a"
