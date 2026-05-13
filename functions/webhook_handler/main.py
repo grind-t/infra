@@ -113,6 +113,7 @@ def _get_registration_token(org: str, repo: str, pat: str, entity_type: str = "r
         url = f"https://api.github.com/repos/{org}/{repo}/actions/runners/registration-token"
     else:
         url = f"https://api.github.com/orgs/{org}/actions/runners/registration-token"
+    print(f"Requesting registration token: POST {url}")
     req = urllib.request.Request(
         url,
         method="POST",
@@ -123,8 +124,12 @@ def _get_registration_token(org: str, repo: str, pat: str, entity_type: str = "r
             "User-Agent": "yc-github-runner/1.0",
         },
     )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return json.loads(resp.read())["token"]
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read())["token"]
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        raise RuntimeError(f"GitHub API {e.code} at {url}: {body}") from e
 
 
 def _get_iam_token() -> str:
