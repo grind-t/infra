@@ -1,0 +1,10 @@
+github_org         = "grind-t"
+github_entity_type = "user"   # "user" for personal account, "org" for organization
+github_pat     = "github_pat_..."
+webhook_secret = "generate-with: openssl rand -hex 32"
+
+# Optional overrides
+# runner_labels    = "yc-ephemeral"
+# runner_cores     = 2
+# runner_memory_gb = 4
+# runner_disk_gb   = 20
