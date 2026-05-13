@@ -1,6 +1,6 @@
 variable "folder_id" {
   type    = string
-  default = "b1g8kl47hogpklpcjgbh"
+  default = "b1g606qspnhgrua2djkm"
 }
 
 variable "zone" {
