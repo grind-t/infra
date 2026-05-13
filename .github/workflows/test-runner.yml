@@ -17,7 +17,7 @@ jobs:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           folder-id: b1g606qspnhgrua2djkm
-          image-id: fd8fc3q8qr0cgjqk2v94
+          image-id: fd88gqdcq2u1auoueag1
           subnet-id: e9b01ud0tr2gklq5g4hi
           public-ip: false
           memory: 2GB
@@ -27,7 +27,7 @@ jobs:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
     steps:
-      - run: echo 'Hello World!'
+      - run: node --version
 
   stop-runner:
     needs:
