@@ -24,6 +24,7 @@ jobs:
           memory: 2GB
           core-fraction: 100
           subnet-id: e9b01ud0tr2gklq5g4hi
+          public-ip: false
           ttl: PT24H
   do-the-job:
     name: Do the job on the runner
