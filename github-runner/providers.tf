@@ -5,10 +5,6 @@ terraform {
       source  = "yandex-cloud/yandex"
       version = "~> 0.129"
     }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "~> 2.0"
-    }
   }
 }
 

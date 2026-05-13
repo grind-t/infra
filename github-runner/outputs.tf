@@ -1,17 +1,24 @@
-output "webhook_url" {
-  description = "Set this as the GitHub webhook payload URL (content type: application/json, events: Workflow jobs)"
-  value       = "https://functions.yandexcloud.net/${yandex_function.webhook.id}"
-}
-
-output "lockbox_secret_id" {
-  description = "Lockbox secret ID (WEBHOOK_SECRET and GITHUB_PAT are managed by Terraform)"
-  value       = yandex_lockbox_secret.runner_secrets.id
-}
-
-output "function_id" {
-  value = yandex_function.webhook.id
-}
-
-output "runner_subnet_id" {
+output "subnet_id" {
   value = yandex_vpc_subnet.main.id
+}
+
+output "folder_id" {
+  value = var.folder_id
+}
+
+output "zone" {
+  value = var.zone
+}
+
+output "sa_json_credentials" {
+  description = "Put this value into GitHub secret YC_SA_JSON_CREDENTIALS"
+  sensitive   = true
+  value = jsonencode({
+    id                 = yandex_iam_service_account_key.runner_sa_key.id
+    service_account_id = yandex_iam_service_account.runner_sa.id
+    created_at         = yandex_iam_service_account_key.runner_sa_key.created_at
+    key_algorithm      = yandex_iam_service_account_key.runner_sa_key.key_algorithm
+    public_key         = yandex_iam_service_account_key.runner_sa_key.public_key
+    private_key        = yandex_iam_service_account_key.runner_sa_key.private_key
+  })
 }
