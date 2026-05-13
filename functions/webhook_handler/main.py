@@ -72,7 +72,7 @@ def handler(event, context):
     if action != "queued":
         return {"statusCode": 200, "body": "ignored"}
 
-    requested_labels = [label["name"] for label in job.get("labels", [])]
+    requested_labels = job.get("labels", [])
     if RUNNER_LABELS not in requested_labels:
         return {"statusCode": 200, "body": "label mismatch, skipped"}
 
