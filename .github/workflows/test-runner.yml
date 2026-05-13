@@ -5,56 +5,46 @@ on:
 
 jobs:
   start-runner:
+    name: Start self-hosted YC runner
     runs-on: ubuntu-latest
     outputs:
-      label: ${{ steps.runner.outputs.label }}
+      label: ${{ steps.start-yc-runner.outputs.label }}
+      instance-id: ${{ steps.start-yc-runner.outputs.instance-id }}
     steps:
-      - uses: yc-actions/yc-github-runner@v2
-        id: runner
+      - name: Start YC runner
+        id: start-yc-runner
+        uses: yc-actions/yc-github-runner@v2
         with:
           mode: start
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          folder-id: b1g606qspnhgrua2djkm
-          image-id: fd8fc3q8qr0cgjqk2v94
-          zone-id: ru-central1-a
-          subnet-id: e9bon76tk7pevgfp6ioh
+          folder-id: b1g*********
+          image-id: fd80*********
           cores: 2
           memory: 2GB
-          disk-type: network-ssd
-
-  test:
-    needs: start-runner
-    runs-on: ${{ needs.start-runner.outputs.label }}
-    timeout-minutes: 15
+          core-fraction: 100
+          subnet-id: e9b*********
+          ttl: PT24H
+  do-the-job:
+    name: Do the job on the runner
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
     steps:
-      - name: System info
-        run: |
-          echo "Hostname: $(hostname)"
-          echo "Kernel: $(uname -r)"
-          echo "CPU cores: $(nproc)"
-          echo "RAM: $(free -h | awk '/^Mem:/ {print $2}')"
-          echo "Disk: $(df -h / | awk 'NR==2 {print $4}') free"
-
-      - name: Check internet access
-        run: curl -sf https://api.github.com/zen
-
-      - name: Confirm runner is ephemeral
-        run: |
-          if [ "${RUNNER_EPHEMERAL}" = "true" ]; then
-            echo "Runner is ephemeral"
-          else
-            echo "WARNING: runner is not ephemeral"
-          fi
-
+      - name: Hello World
+        run: echo 'Hello World!'
   stop-runner:
-    needs: [start-runner, test]
+    name: Stop self-hosted YC runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - do-the-job # required to wait when the main job is done
     runs-on: ubuntu-latest
-    if: always()
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
-      - uses: yc-actions/yc-github-runner@v2
+      - name: Stop YC runner
+        uses: yc-actions/yc-github-runner@v2
         with:
           mode: stop
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.label }}
+          instance-id: ${{ needs.start-runner.outputs.instance-id }}
