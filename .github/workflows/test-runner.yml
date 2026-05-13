@@ -18,12 +18,12 @@ jobs:
           mode: start
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          folder-id: b1g*********
-          image-id: fd80*********
+          folder-id: b1g606qspnhgrua2djkm
+          image-id: fd8fc3q8qr0cgjqk2v94
           cores: 2
           memory: 2GB
           core-fraction: 100
-          subnet-id: e9b*********
+          subnet-id: e9b01ud0tr2gklq5g4hi
           ttl: PT24H
   do-the-job:
     name: Do the job on the runner
