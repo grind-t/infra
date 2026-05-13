@@ -20,9 +20,8 @@ jobs:
           zone-id: ru-central1-a
           subnet-id: e9bon76tk7pevgfp6ioh
           cores: 2
-          memory: 4
+          memory: 2GB
           disk-type: network-ssd
-          disk-size: 20
 
   test:
     needs: start-runner
