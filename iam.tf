@@ -35,9 +35,9 @@ resource "yandex_lockbox_secret_iam_member" "fn_sa_lockbox" {
   member    = "serviceAccount:${yandex_iam_service_account.fn_sa.id}"
 }
 
-# compute.operator: can delete/stop instances but cannot create them
+# compute.editor: can delete instances (compute.operator doesn't include delete)
 resource "yandex_resourcemanager_folder_iam_member" "runner_sa_compute_operator" {
   folder_id = var.folder_id
-  role      = "compute.operator"
+  role      = "compute.editor"
   member    = "serviceAccount:${yandex_iam_service_account.runner_sa.id}"
 }
