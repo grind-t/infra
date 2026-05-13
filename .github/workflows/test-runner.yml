@@ -5,14 +5,12 @@ on:
 
 jobs:
   start-runner:
-    name: Start self-hosted YC runner
     runs-on: ubuntu-latest
     outputs:
       label: ${{ steps.start-yc-runner.outputs.label }}
       instance-id: ${{ steps.start-yc-runner.outputs.instance-id }}
     steps:
-      - name: Start YC runner
-        id: start-yc-runner
+      - id: start-yc-runner
         uses: yc-actions/yc-github-runner@v2
         with:
           mode: start
@@ -20,29 +18,25 @@ jobs:
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           folder-id: b1g606qspnhgrua2djkm
           image-id: fd8fc3q8qr0cgjqk2v94
-          cores: 2
-          memory: 2GB
-          core-fraction: 100
           subnet-id: e9b01ud0tr2gklq5g4hi
           public-ip: false
+          memory: 2GB
           ttl: PT24H
+
   do-the-job:
-    name: Do the job on the runner
-    needs: start-runner # required to start the main job when the runner is ready
-    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
+    needs: start-runner
+    runs-on: ${{ needs.start-runner.outputs.label }}
     steps:
-      - name: Hello World
-        run: echo 'Hello World!'
+      - run: echo 'Hello World!'
+
   stop-runner:
-    name: Stop self-hosted YC runner
     needs:
-      - start-runner # required to get output from the start-runner job
-      - do-the-job # required to wait when the main job is done
+      - start-runner
+      - do-the-job
     runs-on: ubuntu-latest
-    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    if: ${{ always() }}
     steps:
-      - name: Stop YC runner
-        uses: yc-actions/yc-github-runner@v2
+      - uses: yc-actions/yc-github-runner@v2
         with:
           mode: stop
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
