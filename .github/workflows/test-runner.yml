@@ -17,7 +17,7 @@ jobs:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           folder-id: b1g606qspnhgrua2djkm
-          image-id: fd88gqdcq2u1auoueag1
+          image-id: fd8old7fperdsthc63l1
           subnet-id: e9b01ud0tr2gklq5g4hi
           public-ip: false
           memory: 2GB
@@ -27,6 +27,9 @@ jobs:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
     steps:
+      - name: Install Node.js 24 LTS
+      - run: curl -o- https://fnm.vercel.app/install | bash
+      - run: fnm install 24
       - run: node --version
 
   stop-runner:
