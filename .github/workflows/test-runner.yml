@@ -29,8 +29,8 @@ jobs:
     steps:
       - name: Install Node.js 24 via fnm
         run: |
-          curl -o- https://fnm.vercel.app/install | bash
-          fnm install 24
+          curl -fsSL https://deb.nodesource.com/setup_24.x | sudo bash -
+          sudo apt-get install -y nodejs
       - run: node --version
 
   stop-runner:
