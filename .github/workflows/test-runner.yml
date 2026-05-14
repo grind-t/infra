@@ -27,9 +27,10 @@ jobs:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
     steps:
-      - name: Install Node.js 24 LTS
-      - run: curl -o- https://fnm.vercel.app/install | bash
-      - run: fnm install 24
+      - name: Install Node.js 24 via fnm
+        run: |
+          curl -o- https://fnm.vercel.app/install | bash
+          fnm install 24
       - run: node --version
 
   stop-runner:
